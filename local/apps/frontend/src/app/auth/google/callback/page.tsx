@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { PageShell } from "@/components/layout/page-shell";
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -38,3 +38,10 @@ export default function GoogleCallbackPage() {
   );
 }
 
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense>
+      <GoogleCallbackInner />
+    </Suspense>
+  );
+}

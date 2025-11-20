@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/layout/page-shell";
 import { AuthGuard } from "@/components/auth/auth-guard";
@@ -9,7 +9,7 @@ import { useBookingsByUser } from "@/hooks/use-booking";
 import { BookingsList } from "@/components/bookings/bookings-list";
  
 
-export default function DashboardPage() {
+function DashboardPageInner() {
   const { user, token } = useAuthState();
   const searchParams = useSearchParams();
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -129,5 +129,13 @@ export default function DashboardPage() {
         )}
       </PageShell>
     </AuthGuard>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardPageInner />
+    </Suspense>
   );
 }

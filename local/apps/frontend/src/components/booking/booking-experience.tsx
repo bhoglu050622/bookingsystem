@@ -11,7 +11,7 @@ import { PaymentStep } from "@/components/booking/payment-step";
 import { BookingRedirectAnimation } from "@/components/booking/booking-redirect-animation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { InstructorProfile, AvailabilitySlot } from "@/lib/types";
+import type { InstructorProfile, AvailabilitySlot, DailyAvailability } from "@/lib/types";
 import { useDailyAvailability } from "@/hooks/use-instructors";
 import { useAuthState } from "@/hooks/use-auth";
 import {
@@ -58,29 +58,30 @@ export function BookingExperience({ instructor }: BookingExperienceProps) {
   const activeDate = selectedDate ?? defaultDateIso;
 
   const { data, isLoading, error } = useDailyAvailability(instructor.id, activeDate);
+  const availability = data as unknown as DailyAvailability | undefined;
   
   // Log for debugging
   useEffect(() => {
     if (error) {
       console.error("Availability fetch error:", error);
     }
-    if (data) {
-      console.log("Availability data:", { instructorId: instructor.id, date: activeDate, slotsCount: data.slots?.length ?? 0 });
+    if (availability) {
+      console.log("Availability data:", { instructorId: instructor.id, date: activeDate, slotsCount: availability.slots?.length ?? 0 });
     }
-  }, [error, data, instructor.id, activeDate]);
+  }, [error, availability, instructor.id, activeDate]);
 
   // Calculate available dates from slots (for calendar display)
   const availableDates = useMemo(() => {
-    if (!data?.slots) return [];
+    if (!availability?.slots) return [];
     const dates = new Set<string>();
-    data.slots.forEach((slot) => {
+    availability.slots.forEach((slot) => {
       if (slot.status === "AVAILABLE" && !slot.isLocked) {
         const slotDate = parseISO(slot.startTimeUtc);
         dates.add(startOfDay(slotDate).toISOString());
       }
     });
     return Array.from(dates).map((iso) => parseISO(iso));
-  }, [data?.slots]);
+  }, [availability?.slots]);
 
   const handleCalendarDateSelect = (date: Date) => {
     setSelectedDate(startOfDay(date).toISOString());
@@ -89,8 +90,8 @@ export function BookingExperience({ instructor }: BookingExperienceProps) {
   const selectedDateObj = selectedDate ? parseISO(selectedDate) : null;
 
   const selectedSlot = useMemo(() => {
-    return data?.slots.find((slot) => slot.id === selectedSlotId) ?? null;
-  }, [data?.slots, selectedSlotId]);
+    return availability?.slots.find((slot) => slot.id === selectedSlotId) ?? null;
+  }, [availability?.slots, selectedSlotId]);
 
   const handleSlotSelect = (slot: AvailabilitySlot) => {
     if (slot.id === selectedSlotId) return;
@@ -233,7 +234,7 @@ export function BookingExperience({ instructor }: BookingExperienceProps) {
             </div>
           ) : (
             <SlotList
-              slots={data?.slots ?? []}
+              slots={availability?.slots ?? []}
               selectedSlotId={selectedSlotId}
               onSelect={handleSlotSelect}
               isLoading={isLoading}
