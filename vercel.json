@@ -1,7 +1,7 @@
 {
-  "framework": "nextjs",
-  "buildCommand": "cd local/apps/frontend && npm install && npm run build",
-  "outputDirectory": "local/apps/frontend/.next",
+  "builds": [
+    { "src": "local/apps/frontend/package.json", "use": "@vercel/next" }
+  ],
   "env": {
     "NEXT_PUBLIC_USE_MOCK_API": "true"
   }
