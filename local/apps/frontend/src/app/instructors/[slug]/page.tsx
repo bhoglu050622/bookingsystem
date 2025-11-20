@@ -1,15 +1,22 @@
 import { notFound } from "next/navigation";
 import { fetchInstructor } from "@/services/instructors";
+import { HARDCODED_INSTRUCTORS } from "@/data/hardcoded-instructors";
 import { BookingExperience } from "@/components/booking/booking-experience";
 import { PageShell } from "@/components/layout/page-shell";
 import { formatCurrency } from "@/lib/utils";
 
 type InstructorPageProps = {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 };
 
+export async function generateStaticParams() {
+  return HARDCODED_INSTRUCTORS.map((instructor) => ({
+    slug: instructor.slug,
+  }));
+}
+
 export async function generateMetadata({ params }: InstructorPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   const instructor = await fetchInstructor(slug).catch(() => null);
 
   if (!instructor) {
@@ -25,7 +32,7 @@ export async function generateMetadata({ params }: InstructorPageProps) {
 }
 
 export default async function InstructorPage({ params }: InstructorPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   const instructor = await fetchInstructor(slug).catch(() => null);
 
   if (!instructor) {
