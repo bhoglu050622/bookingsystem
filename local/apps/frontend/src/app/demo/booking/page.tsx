@@ -280,7 +280,7 @@ export default function DemoBookingPage() {
                   meetingDuration: selectedService?.duration ?? 30,
                 } as any}
                 slot={selectedSlot ?? undefined}
-                paymentCompleted={step === "confirm"}
+                paymentCompleted={false}
                 amountPaid={selectedService?.priceAmount ?? 2999}
                 currency={selectedService?.priceCurrency ?? "INR"}
               />
