@@ -16,12 +16,18 @@ export async function fetchInstructor(slug: string, useScraped: boolean = true):
   return Promise.resolve(instructor);
 }
 
+const rawMockFlag = process.env.NEXT_PUBLIC_USE_MOCK_API;
+const USE_MOCK_API =
+  rawMockFlag === undefined ||
+  rawMockFlag === "" ||
+  rawMockFlag === "true" ||
+  rawMockFlag === "1";
+
 export async function fetchDailyAvailability(
   instructorId: string,
   dateIso: string,
 ): Promise<DailyAvailability> {
-  const useMock = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
-  const param = useMock ? "date" : "targetDate";
+  const param = USE_MOCK_API ? "date" : "targetDate";
   return apiFetch<DailyAvailability>(
     `/availability/instructor/${instructorId}?${param}=${dateIso}`,
     { tags: [`availability:${instructorId}`] },

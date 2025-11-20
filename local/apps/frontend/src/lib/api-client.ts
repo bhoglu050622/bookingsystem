@@ -1,8 +1,13 @@
 import { API_BASE_URL } from "@/lib/utils";
 
-// Use mock API ONLY if explicitly enabled via environment variable
-// Default to real API to use actual Google Calendar integration
-const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === "true";
+// In Vercel we default to mocks unless the flag is explicitly set to "false".
+// This keeps the marketing site functional without requiring the backend.
+const rawMockFlag = process.env.NEXT_PUBLIC_USE_MOCK_API;
+const USE_MOCK_API =
+  rawMockFlag === undefined ||
+  rawMockFlag === "" ||
+  rawMockFlag === "true" ||
+  rawMockFlag === "1";
 
 type FetchOptions = RequestInit & {
   tags?: string[];
