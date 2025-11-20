@@ -1,1 +1,8 @@
-{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "framework": "nextjs",
+  "buildCommand": "cd local/apps/frontend && npm install && npm run build",
+  "outputDirectory": "local/apps/frontend/.next",
+  "env": {
+    "NEXT_PUBLIC_USE_MOCK_API": "true"
+  }
+}
