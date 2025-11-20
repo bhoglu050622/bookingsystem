@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  INSTRUCTOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  PAYMENT_INITIATED
+  PAID
+  CONFIRMED
+  CANCELLED
+}
+
+enum TransactionStatus {
+  CREATED
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+  PAYMENT_RECEIPT
+  REMINDER_24H
+  REMINDER_1H
+  CANCELLATION
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum SlotStatus {
+  AVAILABLE
+  RESERVED
+  BOOKED
+  DISABLED
+}
+
+enum MeetCredentialType {
+  SERVICE_ACCOUNT
+  OAUTH
+}
+
+model User {
+  id                  String             @id @default(cuid())
+  email               String             @unique
+  passwordHash        String?
+  googleId            String?            @unique
+  googleAccessToken   String?            @db.Text
+  googleRefreshToken  String?            @db.Text
+  googleTokenExpiry   DateTime?
+  firstName           String?
+  lastName            String?
+  phoneNumber         String?
+  role                UserRole           @default(USER)
+  timezone            String?            @default("UTC")
+  instructor          InstructorProfile?
+  bookings            Booking[]
+  transactions        Transaction[]
+  notifications       Notification[]
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+}
+
+model InstructorProfile {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  slug             String             @unique
+  displayName      String
+  headline         String?
+  bio              String?
+  avatarUrl        String?
+  pricingAmount    Int
+  pricingCurrency  String             @default("INR")
+  meetingDuration  Int                @default(30) // minutes
+  bufferBefore     Int                @default(0)
+  bufferAfter      Int                @default(0)
+  active           Boolean            @default(true)
+  calendarTimezone String             @default("UTC")
+  rrule            String? // base recurrence rule definition
+  slots            AvailabilitySlot[]
+  bookings         Booking[]
+  meetCredential   MeetCredential?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AvailabilitySlot {
+  id                  String     @id @default(cuid())
+  instructorProfileId String
+  startTime           DateTime
+  endTime             DateTime
+  timezone            String     @default("UTC")
+  status              SlotStatus @default(AVAILABLE)
+  recurrenceId        String?
+  createdByRule       Boolean    @default(false)
+  locks               SlotLock[]
+  booking             Booking?   @relation("SlotBooking")
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  instructor InstructorProfile @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+}
+
+model SlotLock {
+  id          String   @id @default(cuid())
+  slotId      String
+  token       String   @unique
+  lockedUntil DateTime
+  userId      String?
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  slot AvailabilitySlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+}
+
+model MeetCredential {
+  id                  String             @id @default(cuid())
+  instructorProfileId String             @unique
+  type                MeetCredentialType @default(SERVICE_ACCOUNT)
+  clientEmail         String?
+  privateKey          String?
+  calendarId          String?            @default("primary")
+  scopes              String?            @default("https://www.googleapis.com/auth/calendar")
+  tokens              Json?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  instructor InstructorProfile @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id                  String        @id @default(cuid())
+  userId              String
+  instructorProfileId String
+  slotId              String?       @unique
+  status              BookingStatus @default(PENDING)
+  scheduledStart      DateTime
+  scheduledEnd        DateTime
+  timezone            String        @default("UTC")
+  meetEventId         String?
+  meetLink            String?
+  notes               String?
+  priceAmount         Int
+  priceCurrency       String        @default("INR")
+  metadata            Json?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructor    InstructorProfile @relation(fields: [instructorProfileId], references: [id], onDelete: Cascade)
+  slot          AvailabilitySlot? @relation("SlotBooking", fields: [slotId], references: [id])
+  transactions  Transaction[]
+  notifications Notification[]
+}
+
+model Transaction {
+  id         String            @id @default(cuid())
+  bookingId  String
+  userId     String
+  provider   String
+  orderId    String?
+  paymentId  String?
+  signature  String?
+  amount     Int
+  currency   String            @default("INR")
+  status     TransactionStatus @default(CREATED)
+  rawPayload Json?
+  error      Json?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id           String              @id @default(cuid())
+  bookingId    String?
+  userId       String
+  type         NotificationType
+  channel      NotificationChannel
+  status       NotificationStatus  @default(QUEUED)
+  payload      Json?
+  template     String?
+  templateData Json?
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  error        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  booking Booking? @relation(fields: [bookingId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

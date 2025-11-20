@@ -1,0 +1,9 @@
+{
+  "name": "@booking/shared-config",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    "./tsconfig": "./tsconfig.json"
+  }
+}
+
