@@ -263,7 +263,7 @@ export default function DemoBookingPage() {
                 ) : (
                   <SlotList
                     slots={slots}
-                    selectedSlotId={selectedSlotId || undefined}
+                    selectedSlotId={selectedSlotId}
                     onSelect={(slot) => setSelectedSlotId(slot.id)}
                     isLoading={false}
                   />
