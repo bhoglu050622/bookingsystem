@@ -1,9 +1,0 @@
-{
-  "buildCommand": "npm run build -w apps/frontend",
-  "installCommand": "npm install",
-  "outputDirectory": "apps/frontend/.next",
-  "framework": "nextjs",
-  "env": {
-    "NEXT_PUBLIC_USE_MOCK_API": "true"
-  }
-}
