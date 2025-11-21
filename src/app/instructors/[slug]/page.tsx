@@ -6,7 +6,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { formatCurrency } from "@/lib/utils";
 
 type InstructorPageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: InstructorPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   if (!slug) {
     return { title: "Instructor not found" };
   }
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: InstructorPageProps) {
 }
 
 export default async function InstructorPage({ params }: InstructorPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   if (!slug) {
     notFound();
   }
