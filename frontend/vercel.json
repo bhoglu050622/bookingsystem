@@ -1,7 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd ../.. && npm install",
-  "buildCommand": "cd ../.. && npm run build -w apps/frontend",
   "framework": "nextjs",
   "env": {
     "NEXT_PUBLIC_USE_MOCK_API": "true"

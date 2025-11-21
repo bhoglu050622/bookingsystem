@@ -19,8 +19,7 @@ coverage/
 **/.env.local
 
 # Remove accidental backups or docs with secrets
-local/apps/backend/.env.backup*
-local/*.md
+backend/.env.backup*
 
 # Logs
 logs/
