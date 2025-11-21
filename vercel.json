@@ -1,17 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "local/apps/frontend/package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "local/apps/frontend/$1"
-    }
-  ],
+  "buildCommand": "cd local && npm install && npm run build -w apps/frontend",
+  "framework": "nextjs",
+  "rootDirectory": "local/apps/frontend",
   "env": {
     "NEXT_PUBLIC_USE_MOCK_API": "true"
   }
