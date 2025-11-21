@@ -124,25 +124,24 @@ export async function mockApiFetch<T>(
 ): Promise<T> {
   await delay(300); // Simulate network delay
 
-  // GET /instructors (with or without query params)
-  if (path.startsWith("/instructors") && (!options?.method || options.method === "GET")) {
-    // Handle query params like ?useScraped=true
-    const pathWithoutQuery = path.split("?")[0];
-    if (pathWithoutQuery === "/instructors") {
-      console.log(`[Mock API] GET /instructors - Returning ${MOCK_INSTRUCTORS.length} instructors:`, MOCK_INSTRUCTORS.map(i => i.displayName));
-      return MOCK_INSTRUCTORS as T;
-    }
-  }
-
-  // GET /instructors/:slug
-  const instructorSlugMatch = path.match(/^\/instructors\/([^/]+)$/);
+  // GET /instructors/:slug (check this first before the list endpoint)
+  const instructorSlugMatch = path.match(/^\/instructors\/([^/?]+)(\?.*)?$/);
   if (instructorSlugMatch && (!options?.method || options.method === "GET")) {
     const slug = instructorSlugMatch[1];
     const instructor = MOCK_INSTRUCTORS.find((inst) => inst.slug === slug);
     if (instructor) {
+      console.log(`[Mock API] GET /instructors/${slug} - Found instructor:`, instructor.displayName);
       return instructor as T;
     }
+    console.error(`[Mock API] GET /instructors/${slug} - Instructor not found. Available slugs:`, MOCK_INSTRUCTORS.map(i => i.slug));
     throw new Error(`Instructor with slug "${slug}" not found`);
+  }
+
+  // GET /instructors (with or without query params)
+  const pathWithoutQuery = path.split("?")[0];
+  if (pathWithoutQuery === "/instructors" && (!options?.method || options.method === "GET")) {
+    console.log(`[Mock API] GET /instructors - Returning ${MOCK_INSTRUCTORS.length} instructors:`, MOCK_INSTRUCTORS.map(i => i.displayName));
+    return MOCK_INSTRUCTORS as T;
   }
 
   // GET /availability/instructor/:id?date=...

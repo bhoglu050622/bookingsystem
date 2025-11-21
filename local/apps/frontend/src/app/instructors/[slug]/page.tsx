@@ -17,6 +17,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: InstructorPageProps) {
   const { slug } = params;
+  if (!slug) {
+    return { title: "Instructor not found" };
+  }
   const instructor = await fetchInstructor(slug).catch(() => null);
 
   if (!instructor) {
@@ -33,6 +36,9 @@ export async function generateMetadata({ params }: InstructorPageProps) {
 
 export default async function InstructorPage({ params }: InstructorPageProps) {
   const { slug } = params;
+  if (!slug) {
+    notFound();
+  }
   const instructor = await fetchInstructor(slug).catch(() => null);
 
   if (!instructor) {

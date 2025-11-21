@@ -8,12 +8,8 @@ export async function fetchInstructors(useScraped: boolean = true): Promise<Inst
 }
 
 export async function fetchInstructor(slug: string, useScraped: boolean = true): Promise<InstructorProfile> {
-  // Search hardcoded list by slug
-  const instructor = HARDCODED_INSTRUCTORS.find((inst) => inst.slug === slug);
-  if (!instructor) {
-    throw new Error(`Instructor with slug "${slug}" not found`);
-  }
-  return Promise.resolve(instructor);
+  // Use API client to ensure mock API works correctly for e2e testing
+  return apiFetch<InstructorProfile>(`/instructors/${slug}`);
 }
 
 const rawMockFlag = process.env.NEXT_PUBLIC_USE_MOCK_API;
